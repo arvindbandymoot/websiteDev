@@ -9,7 +9,7 @@ const {
   sendotp,
 varifyemail
 
-} = require("../controller/Leavecontroller/Auth")
+} = require("../../controller/Leavecontroller/Auth")
 
 const { auth } = require("../../midlewere/Auth")
 
