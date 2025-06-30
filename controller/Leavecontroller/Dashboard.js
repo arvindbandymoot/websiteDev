@@ -26,6 +26,29 @@ exports.leaveDetails=async(req,res)=>{
     }
 }
 
+exports.getAllleave=async(req,res)=>{
+    try {
+        const Alldata=await User.find({}).populate('takenleave')
+        if(!Alldata){
+            return res.status(200).json({
+                success:false,
+                meassage:"No data exist..."
+            })
+        }
+        res.status(200).json({
+            success:true,
+            message:"Data fetch successfully ...",
+            data:Alldata
+        })
+    } catch (error) {
+        console.log(error)
+        return res.status(400).json({
+            success:false,
+            message:"Error during fetch.."
+        })
+    }
+}
+
 exports.addyearLeave=async(req,res)=>{
   try {
     const userId=req.user.id

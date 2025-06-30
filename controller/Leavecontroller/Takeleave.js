@@ -1,5 +1,5 @@
-const User=require('../models/User')
-const Leave=require('../models/Leave')
+const User=require('../../models/User')
+const Leave=require('../../models/Leave')
 const cron = require('node-cron');
 exports.leave=async(req,res)=>{
     try {

@@ -1,9 +1,9 @@
 const express=require('express')
 const app=express()
 
-const userRoutes=require('./routes/User')
-const leaveRoutes=require('./routes/leave')
-const DashboardRoutes=require('./routes/Dashboard')
+const userRoutes=require('./routes/LeaveRoutes/User')
+const leaveRoutes=require('./routes/LeaveRoutes/leave')
+const DashboardRoutes=require('./routes/LeaveRoutes/Dashboard')
 
 
 const connectDB=require('./config/Database')
@@ -20,6 +20,7 @@ app.use(
 		credentials:true,
 	})
 )
+
 
 // app.use(
 // 	fileUpload({

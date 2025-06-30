@@ -22,7 +22,9 @@ const userSchema = new mongoose.Schema(
 			trim: true,
 			lowercase: true
 		},
-
+		employeeId: {
+			type: String,
+		},
 		// Define the password field with type String and required
 		password: {
 			type: String,

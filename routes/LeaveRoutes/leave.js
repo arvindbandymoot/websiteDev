@@ -1,8 +1,8 @@
 const express=require('express')
 const router=express.Router()
 
-const { leave,Cancleleave,approval,addleave}=require('../controller/Takeleave')
-const { auth, isEmployees, isAdmin } = require("../midlewere/Auth")
+const { leave,Cancleleave,approval}=require('../../controller/Leavecontroller/Takeleave')
+const { auth, isEmployees, isAdmin } = require("../../midlewere/Auth")
 
 router.post("/TakeLeave",auth,isEmployees, leave)
 router.post("/CancleLeave",auth, Cancleleave)

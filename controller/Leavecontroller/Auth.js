@@ -1,14 +1,15 @@
-const User=require('../models/User')
+const User=require('../../models/User')
 const bcrypt = require("bcrypt")
 const jwt=require("jsonwebtoken")
 const otpGenerator=require('otp-generator')
-const OTP=require('../models/OTP')
+const OTP=require('../../models/OTP')
 require('dotenv').config()
 
 
 
 
 exports.signup=async(req,res)=>{
+  console.log(req.body)
     try {
     const {firstName,
         lastName,
@@ -16,16 +17,18 @@ exports.signup=async(req,res)=>{
       password,
       confirmPassword,
       accountType,
-      otp}=req.body
+      employeeId,
+    
+      }=req.body
     if(!firstName ||!lastName||!email||!password||!confirmPassword||
-        !accountType||!otp
+        !accountType||!employeeId
     ) {
         return res.status(403).send({
             success:false,
             message:"All Field are required"
         })
     } 
-    console.log("hellow")
+    console.log("helloG")
     if (password !== confirmPassword) {
       return res.status(400).json({
         success: false,
@@ -42,22 +45,22 @@ exports.signup=async(req,res)=>{
         })
     }
 
-    const otpresponse=await OTP.find({email}).sort({ createdAt: -1 }).limit(1)
-    console.log(otpresponse)
-    console.log("hellow")
-    if (otpresponse.length === 0) {
-      // OTP not found for the email
-      return res.status(400).json({
-        success: false,
-        message: "The OTP is not valid",
-      })
-    } else if (otp !== otpresponse[0].otp) {
-      // Invalid OTP
-      return res.status(400).json({
-        success: false,
-        message: "The OTP is not valid",
-      })
-    }
+    // const otpresponse=await OTP.find({email}).sort({ createdAt: -1 }).limit(1)
+    // console.log(otpresponse)
+    // console.log("hellow")
+    // if (otpresponse.length === 0) {
+    //   // OTP not found for the email
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: "The OTP is not valid",
+    //   })
+    // } else if (otp !== otpresponse[0].otp) {
+    //   // Invalid OTP
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: "The OTP is not valid",
+    //   })
+    // }
     const hashedPassword = await bcrypt.hash(password, 10)
     const user = await User.create({
       firstName,
@@ -65,6 +68,7 @@ exports.signup=async(req,res)=>{
       email,
       password: hashedPassword,
       accountType: accountType,
+      employeeId: employeeId,
     //   approved: approved,
      // additionalDetails: profileDetails._id,
       image: `https://api.dicebear.com/5.x/initials/svg?seed=${firstName}${lastName}`,
@@ -83,12 +87,6 @@ exports.signup=async(req,res)=>{
     })
     }
 }
-
-
-
-
-
-
 
 
 exports.login=async(req,res)=>{
@@ -190,4 +188,37 @@ exports.sendotp=async(req,res)=>{
         console.log(error.message)
         return res.status(500).json({ success: false, error: error.message })
     }
+}
+
+exports.varifyemail=async(req,res)=>{
+  try {
+    const {email,otp}=req.body
+    const otpresponse=await OTP.find({email}).sort({ createdAt: -1 }).limit(1)
+    console.log(otpresponse)
+    console.log("hellow")
+    if (otpresponse.length === 0) {
+      // OTP not found for the email
+      return res.status(400).json({
+        success: false,
+        message: "The OTP is not valid",
+      })
+    } else if (otp !== otpresponse[0].otp) {
+      // Invalid OTP
+      return res.status(400).json({
+        success: false,
+        message: "The OTP is not valid",
+      })
+    }
+    return res.status(200).json({
+      success: true,
+      message: "Email verified successfully",
+    })
+    
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({
+      success: false,
+      message: "Error verifying email. Please try again.",
+    })
+  }
 }

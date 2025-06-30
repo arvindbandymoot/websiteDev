@@ -17,6 +17,10 @@ const leaveSchema=new mongoose.Schema(
             type:Date,
             default:Date.now
         },
+        // leaveType:{
+        //     type:String,
+        //     require:true
+        // },
         description:{
             type:String,
             require:true

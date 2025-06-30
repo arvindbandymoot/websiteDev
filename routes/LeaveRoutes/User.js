@@ -7,9 +7,11 @@ const {
   login,
   signup,
   sendotp,
-} = require("../controller/Auth")
+varifyemail
 
-const { auth } = require("../midlewere/Auth")
+} = require("../controller/Leavecontroller/Auth")
+
+const { auth } = require("../../midlewere/Auth")
 
 // Routes for Login, Signup, and Authentication
 
@@ -20,6 +22,7 @@ const { auth } = require("../midlewere/Auth")
 router.post("/login", login)
 router.post("/signup", signup)
 router.post("/sendotp", sendotp)
+router.post("/verifyotp", varifyemail)
 
 // Export the router for use in the main application
 module.exports = router
