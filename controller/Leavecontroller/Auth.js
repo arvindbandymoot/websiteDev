@@ -1,4 +1,5 @@
 const User=require('../../models/User')
+const Employee=require('../../models/Employee')
 const bcrypt = require("bcrypt")
 const jwt=require("jsonwebtoken")
 const otpGenerator=require('otp-generator')
@@ -11,15 +12,16 @@ require('dotenv').config()
 exports.signup=async(req,res)=>{
   console.log(req.body)
     try {
-    const {firstName,
-        lastName,
+    const {
+      firstName,
+      lastName,
       email,
       password,
       confirmPassword,
       accountType,
       employeeId,
     
-      }=req.body
+    }=req.body
     if(!firstName ||!lastName||!email||!password||!confirmPassword||
         !accountType||!employeeId
     ) {
@@ -44,23 +46,9 @@ exports.signup=async(req,res)=>{
             message:"Allready User exist"
         })
     }
-
-    // const otpresponse=await OTP.find({email}).sort({ createdAt: -1 }).limit(1)
-    // console.log(otpresponse)
-    // console.log("hellow")
-    // if (otpresponse.length === 0) {
-    //   // OTP not found for the email
-    //   return res.status(400).json({
-    //     success: false,
-    //     message: "The OTP is not valid",
-    //   })
-    // } else if (otp !== otpresponse[0].otp) {
-    //   // Invalid OTP
-    //   return res.status(400).json({
-    //     success: false,
-    //     message: "The OTP is not valid",
-    //   })
-    // }
+const profileDetails=await Employee.create({
+  
+})
     const hashedPassword = await bcrypt.hash(password, 10)
     const user = await User.create({
       firstName,

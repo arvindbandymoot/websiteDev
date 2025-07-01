@@ -1,11 +1,15 @@
 const mongoose=require('mongoose')
 const leaveSchema=new mongoose.Schema(
     {
-        name:{
-            type:String,
-            require:true
-        },
-        email:{
+        // name:{
+        //     type:String,
+        //     require:true
+        // },
+        // email:{
+        //     type:String,
+        //     require:true
+        // },
+        userId:{
             type:String,
             require:true
         },
@@ -17,17 +21,18 @@ const leaveSchema=new mongoose.Schema(
             type:Date,
             default:Date.now
         },
-        // leaveType:{
-        //     type:String,
-        //     require:true
-        // },
+        leaveType:{
+            type:String,
+            require:true
+        },
         description:{
             type:String,
             require:true
         },
         status:{
-            type:Boolean,
-            default:false
+            type:String,
+            enum: ['Pending', 'Approved', 'Rejected', 'Cancelled'],
+            default: 'Pending'
         },
         isawailbleleave:{
             type:Number,
@@ -37,11 +42,6 @@ const leaveSchema=new mongoose.Schema(
             type:Number,
             default:0
         },
-        user: {
-		type: mongoose.Schema.Types.ObjectId,
-		required: true,
-		ref: "User",
-	    },
         createdAt: {
 		type: Date,
 		default: Date.now,

@@ -36,25 +36,19 @@ const userSchema = new mongoose.Schema(
 			enum: ["Admin", "Employees"],
 			required: true,
 		},
-        takenLeave: [{
+		additionalDetails: {
 			type: mongoose.Schema.Types.ObjectId,
 			required: true,
-			ref: "Leave",
-		}],
-		awailbleLeave: 
-			{
-				type: Number,
-				default:2,
-			},
-		creditleave:{
-			type:Number,
-			default:0
+			ref: "Employee",
 		},
-		extraleave:{type:Number,default:0},
-		Totalleave:{
-			type:Number,
-			default:0
+		leaveDetails: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: "LeaveInfo",
 		},
+		isActive: {
+         type: Boolean,
+         default: true
+        },
         token: {
 			type: String,
 		},
