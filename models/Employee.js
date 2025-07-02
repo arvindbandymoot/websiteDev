@@ -3,23 +3,6 @@ const bcrypt = require('bcrypt');
 
 
 const employeeSchema = new mongoose.Schema({
-  employeeId: {
-    type: String,
-    required: true,
-    unique: true,
-    trim: true
-  },
-  employeeName: {
-   firstName:{
-    type: String,
-     required: true,
-   },
-   lastName:{
-
-    type:String, 
-    required: true
-  }
-},
   department: {
     type: String,
     required: true,
@@ -51,7 +34,6 @@ const employeeSchema = new mongoose.Schema({
   residentialStatus: {
     type: String,
     enum: ['Resident', 'Non-Resident', 'Ordinarily Resident'],
-    required: true
   },
   pfNumber: {
     type: String,
@@ -60,19 +42,10 @@ const employeeSchema = new mongoose.Schema({
   },
   esiNumber: {
     type: String,
-    required: true,
     trim: true
   },
   epsNumber: {
     type: String,
-    required: true,
-    trim: true
-  },
-  email: {
-    type: String,
-    required: true,
-    lowercase: true,
-    unique: true,
     trim: true
   },
   phoneNumber: {
@@ -102,7 +75,6 @@ const employeeSchema = new mongoose.Schema({
   maritalStatus: {
     type: String,
     enum: ['Married','Single'],
-    required: true,
     trim: true
   },
   dateOfMarriage:{
@@ -178,21 +150,9 @@ const employeeSchema = new mongoose.Schema({
         type:String
     }
 
-  },
-  accountType: {
-    type: String,
-    required: true,
-    enum: {
-      values: ['employee', 'admin'],
-      message: 'Account type must be either employee or admin'
-    },
-    default: 'employee'
-  },
-  isActive: {
-    type: Boolean,
-    default: true
   }
-}, {
+},
+ {
   timestamps: true
 });
 

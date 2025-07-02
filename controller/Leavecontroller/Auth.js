@@ -1,4 +1,6 @@
 const User=require('../../models/User')
+const LeaveInfo=require('../../models/LeaveInfo')
+const Leave=require('../../models/Leave')
 const Employee=require('../../models/Employee')
 const bcrypt = require("bcrypt")
 const jwt=require("jsonwebtoken")
@@ -46,9 +48,72 @@ exports.signup=async(req,res)=>{
             message:"Allready User exist"
         })
     }
+
+
 const profileDetails=await Employee.create({
+  department: "Not Assigned",
+  costCenter: "Not Assigned",
+  location: "Not Assigned",
+  designation: "Not Assigned",  
+  dateOfBirth: "Not Assigned",
+  dateOfJoining: "Not Assigned",
+  residentialStatus: "Not Assigned",
+  pfNumber: "Not Assigned",
+  esiNumber: "Not Assigned",
+  epsNumber: "Not Assigned",
+
+  phoneNumber: "Not Assigned",
+  permanentAddress: "Not Assigned",
+  currentAddress: "Not Assigned",
+  bankDetails: {
+    accountNumber:"Not Assigned",
+    bankName: "Not Assigned",
+    ifscCode: "Not Assigned",
+    branchName: "Not Assigned",
+    adharNumber: "Not Assigned",
+    panNumber: "Not Assigned",  
+
+  },
+  bloodGroup: "Not Assigned",
+  nationality: "Not Assigned",
+  secondaryeducation: {
+    tenth: {
+      schoolName: "Not Assigned",
+      yearOfPassing: "Not Assigned",
+      percentage: "Not Assigned", 
+      board: "Not Assigned",
+  },
+  twelfth: {
+      schoolName: "Not Assigned", 
+      yearOfPassing: "Not Assigned",
+      percentage: "Not Assigned",
+      board: "Not Assigned",
+  },
+},
+graduation: {
+    collegeName: "Not Assigned",  
+    graduationYear: "Not Assigned",
+    percentage: "Not Assigned",
+  CGPA: "Not Assigned",
+  Backlogs: "Not Assigned",
+},
+  maritalStatus: "Not Assigned",      
+  dateOfMarriage: "Not Assigned",
+  documents: {
+    resume: "Not Assigned",
+    signature: "Not Assigned",
+  },
   
 })
+
+const leaveData=await LeaveInfo.create({
+  availableLeave: 2,
+  creditLeave: 0,
+  extraLeave: 0,
+  totalLeave: 0,
+})
+
+// Hash the password before saving
     const hashedPassword = await bcrypt.hash(password, 10)
     const user = await User.create({
       firstName,
@@ -57,8 +122,8 @@ const profileDetails=await Employee.create({
       password: hashedPassword,
       accountType: accountType,
       employeeId: employeeId,
-    //   approved: approved,
-     // additionalDetails: profileDetails._id,
+      leaveDetails: leaveData._id,
+      additionalDetails: profileDetails._id,
       image: `https://api.dicebear.com/5.x/initials/svg?seed=${firstName}${lastName}`,
     })
     return res.status(200).json({

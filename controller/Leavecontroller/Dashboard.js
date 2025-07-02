@@ -1,4 +1,5 @@
 const User = require("../../models/User")
+const LeaveInfo = require("../../models/LeaveInfo")
 
 exports.leaveDetails=async(req,res)=>{
     try {
@@ -7,7 +8,7 @@ exports.leaveDetails=async(req,res)=>{
         const {userId}=req.body
         console.log("hello 1",userId)
 
-        const userDetails=await User.findById(userId).populate('takenLeave').exec()
+        const userDetails=await User.findById(userId).populate('leaveDetails').exec()
         //const userDetails=await User.find({})
         console.log("hello 1")
         res.status(200).json({
@@ -26,9 +27,13 @@ exports.leaveDetails=async(req,res)=>{
     }
 }
 
+
+
+
+
 exports.getAllleave=async(req,res)=>{
     try {
-        const Alldata=await User.find({}).populate('takenleave')
+        const Alldata=await User.find({}).populate('leaveDetails').exec()
         if(!Alldata){
             return res.status(200).json({
                 success:false,
@@ -53,12 +58,19 @@ exports.addyearLeave=async(req,res)=>{
   try {
     const userId=req.user.id
     /* this code change the data value after one year*/
-    const userDetails=await User.findById(userId)
+    const userdata=await User.findById(userId)
+    if(!userdata){
+        return res.status(404).json({
+            success:false,
+            message:"User not found"
+        })
+    }
+    const userDetails=await LeaveInfo.findById({_id:userdata.leaveDetails})
     let leaveTotal=userDetails.creditleave+userDetails.Totalleave
-    await User.findByIdAndUpdate({_id:userId},
+    await LeaveInfo.findByIdAndUpdate({_id:userdata.leaveDetails},
     { $set: { totalLeave: leaveTotal } }
     );
-    await User.findByIdAndUpdate({_id:userId},
+    await LeaveInfo.findByIdAndUpdate({_id:userdata.leaveDetails},
         {$set:{creditleave:0}},
         {new:true}
     )
@@ -71,15 +83,22 @@ exports.creditleave=async(req,res)=>{
     try {
         const {userId}=req.body
         const userData=await User.findById(userId)
-        userData.creditleave=userData.creditleave+userData.awailbleLeave
-        await userData.save()
+        if(!userData){
+            return res.status(404).json({
+                success:false,
+                message:"User not found"
+            })
+        }
+        const userLeaveInfo=await LeaveInfo.findById({_id:userData.leaveDetails})
+        userLeaveInfo.creditleave=userLeaveInfo.creditleave+userLeaveInfo.awailbleLeave
+        await userLeaveInfo.save()
     } catch (error) {
         console.log(error)
     }
 }
 exports.everyUser=async(req,res)=>{
     try {
-        await User.updateMany({ $inc: { awailbleLeave: 1 } });
+        await LeaveInfo.updateMany({ $inc: { awailbleLeave: 1 } });
     } catch (error) {
         console.log(error)
     }
@@ -87,7 +106,7 @@ exports.everyUser=async(req,res)=>{
 
 exports.everyUserReset=async(req,res)=>{
     try {
-        await User.updateMany({ $set: { awailbleLeave: 0 } });
+        await LeaveInfo.updateMany({ $set: { awailbleLeave: 0 } });
     } catch (error) {
         console.log(error)
     }
