@@ -100,7 +100,8 @@ exports.approval = async (req, res) => {
                     }
                 }
                 else {
-                if (userData.awailbleLeave > 0) {
+
+                 if (userData.awailbleLeave > 0) {
                     var leaveNumber = userData.awailbleLeave - 1
                     userData.awailbleLeave = leaveNumber
                     leaveData.isawailbleleave = 1

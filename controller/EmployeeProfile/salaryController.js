@@ -1,13 +1,29 @@
 const SalarySlip = require('../models/SalarySlip');
 const generatePDF = require('../utils/pdfGenerator');
 const sendSalarySlip = require('../utils/mailSender');
+const User = require('../models/User');
+const SalarySlip = require('../models/SalarySlip');
 
 // Create
 exports.createSalarySlip = async (req, res) => {
   try {
     const slip = new SalarySlip(req.body);
     await slip.save();
-    res.status(201).json(slip);
+     const existingSlip = await User.findOne({employeeId: req.body.employeeId},
+      {
+        $push: {
+          SalarySlip: slip._id
+         },
+      },
+      {new: true}
+     );
+
+    return res.status(201).json({
+      success: true,
+      message: 'Salary slip created successfully',  
+      slip,
+      existingSlip
+    });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -15,15 +31,34 @@ exports.createSalarySlip = async (req, res) => {
 
 // Read All
 exports.getAllSalarySlips = async (req, res) => {
-  const slips = await SalarySlip.find();
-  res.json(slips);
+  try {
+    const slips = await SalarySlip.find({});
+  if (!slips || slips.length === 0) {
+    return res.status(404).json({ error: 'No salary slips found' });
+  }
+  return res.status(200).json({
+    success: true,
+    message: 'Salary slips retrieved successfully',
+    slips
+  });
+  } catch (error) {
+    console.error('Error fetching salary slips:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
 };
 
 // Read One
 exports.getSalarySlipById = async (req, res) => {
   try {
-    const slip = await SalarySlip.findById(req.params.id);
-    res.json(slip);
+    const slip = await SalarySlip.findById({employeeId: req.params.id});
+    if (!slip) {
+      return res.status(404).json({ error: 'Salary slip not found' });
+    }
+    return res.status(200).json({
+      success: true,
+      message: 'Salary slip retrieved successfully',
+      slip
+    });
   } catch {
     res.status(404).json({ error: 'Not found' });
   }
@@ -32,6 +67,10 @@ exports.getSalarySlipById = async (req, res) => {
 // Update
 exports.updateSalarySlip = async (req, res) => {
   try {
+    const {employeeId,salaryId}=req.body;
+    if (!employeeId || !salaryId) {
+      return res.status(400).json({ error: 'Employee ID and Salary ID are required' });
+    }
     const updated = await SalarySlip.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true

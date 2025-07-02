@@ -1,5 +1,6 @@
 // Import the Mongoose library
 const mongoose = require("mongoose");
+const SalarySlip = require("./SalarySlip");
 
 // Define the user schema using the Mongoose Schema constructor
 const userSchema = new mongoose.Schema(
@@ -45,6 +46,12 @@ const userSchema = new mongoose.Schema(
 			type: mongoose.Schema.Types.ObjectId,
 			ref: "LeaveInfo",
 		},
+		SalarySlip:[
+			{
+				type: mongoose.Schema.Types.ObjectId,
+				ref: "SalarySlip",
+			}
+		],
 		isActive: {
          type: Boolean,
          default: true

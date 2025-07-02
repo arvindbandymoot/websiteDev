@@ -4,6 +4,8 @@ const app=express()
 const userRoutes=require('./routes/LeaveRoutes/User')
 const leaveRoutes=require('./routes/LeaveRoutes/leave')
 const DashboardRoutes=require('./routes/LeaveRoutes/Dashboard')
+const employeeRoutes = require('./routes/LeaveRoutes/employee');
+const salaryRoutes = require('./routes/LeaveRoutes/salary');
 
 
 const connectDB=require('./config/Database')
