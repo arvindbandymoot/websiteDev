@@ -4,14 +4,14 @@ const {
   getAllEmployees,
   getEmployeeById,
   updateEmployee,
-  deleteEmployee
-} = require('../controller/employeeController');
-const { auth, isAdmin,isEmployees } = require('../middleware/auth');
+  //deleteEmployee
+} = require('../../controller/EmployeeProfile/employeeController');
+const { auth, isAdmin,isEmployees } = require('../../midlewere/Auth');
 
 //router.post('/:id', createEmployee);
-router.get('/:id',auth,isAdmin, getAllEmployees);
-router.get('/:id',auth,isAdmin, getEmployeeById);
-router.put('/:id',auth,isEmployees, updateEmployee);
-router.delete('/:id', deleteEmployee);
+router.get('/allemployees',auth,isAdmin, getAllEmployees);
+router.post('/findemployeeID',auth,isAdmin, getEmployeeById);
+router.put('/updateemployee',auth,isEmployees, updateEmployee);
+//router.delete('/:id', deleteEmployee);
 
 module.exports = router;

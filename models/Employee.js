@@ -5,39 +5,38 @@ const bcrypt = require('bcrypt');
 const employeeSchema = new mongoose.Schema({
   department: {
     type: String,
-    required: true,
+    //required: true,
     trim: true
   },
   costCenter: {
     type: String,
-    required: true,
+    //required: true,
     trim: true
   },
   location: {
     type: String,
-    required: true,
+    //required: true,
     trim: true
   },
   designation: {
     type: String,
-    required: true,
+    //required: true,
     trim: true
   },
   dateOfBirth: {
-    type: Date,
-    required: true
+    type: String,
+    //required: true
   },
   dateOfJoining: {
-    type: Date,
-    required: true
+    type: String,
+   // required: true
   },
   residentialStatus: {
     type: String,
-    enum: ['Resident', 'Non-Resident', 'Ordinarily Resident'],
   },
   pfNumber: {
     type: String,
-    required: true,
+    //required: true,
     trim: true
   },
   esiNumber: {
@@ -74,24 +73,19 @@ const employeeSchema = new mongoose.Schema({
   },
   maritalStatus: {
     type: String,
-    enum: ['Married','Single'],
-    trim: true
   },
   dateOfMarriage:{
-    type: Date,
-    required: function(){
-        return this.maritalStatus === 'Married';
-    }
+    type: String
   },
   nationality:{
     type: String,
-    required: true
+    //required: true
   },
   secondaryEducation:{
     tenth:{
         schoolName: {
             type: String,
-            required: true
+            //required: true
         },
         board: String,
         yearOfPassing: Number,
@@ -100,7 +94,7 @@ const employeeSchema = new mongoose.Schema({
     twelfth:{
         schoolName:{
             type:String,
-            required: true
+            //required: true
         },
         board:String,
         yearOfPassing: Number,
@@ -119,12 +113,12 @@ const employeeSchema = new mongoose.Schema({
     position: String,
     teamLead: String,
     annualSalary: Number,
-    startingDate: Date,
-    endingDate: Date,
+    startingDate: String,
+    endingDate: String,
     reasonOfLeaving:String 
  },
   skills:{
-    workExperience: Number,
+    workExperience: String,
     keySkills:String,
     keyAchivements:String,
     majorProject: String
@@ -137,20 +131,6 @@ const employeeSchema = new mongoose.Schema({
     Company: String,
     position: String
   },
-  documents:{
-    resume:{
-        type: String,
-        required: true
-    },
-    signature:{
-        type: String,
-        required: true
-    },
-    additionalDocs:{
-        type:String
-    }
-
-  }
 },
  {
   timestamps: true

@@ -7,6 +7,8 @@ const jwt=require("jsonwebtoken")
 const otpGenerator=require('otp-generator')
 const OTP=require('../../models/OTP')
 require('dotenv').config()
+const mailSender = require("../../utils/mailSender")
+const  passwordUpdated  = require("../../mail/template/passwordUpdate")
 
 
 
@@ -49,63 +51,64 @@ exports.signup=async(req,res)=>{
         })
     }
 
-
+console.log("hello11111")
 const profileDetails=await Employee.create({
   department: "Not Assigned",
-  costCenter: "Not Assigned",
-  location: "Not Assigned",
-  designation: "Not Assigned",  
-  dateOfBirth: "Not Assigned",
-  dateOfJoining: "Not Assigned",
-  residentialStatus: "Not Assigned",
-  pfNumber: "Not Assigned",
-  esiNumber: "Not Assigned",
-  epsNumber: "Not Assigned",
+  // costCenter: "Not Assigned",
+  // location: "Not Assigned",
+  // designation: "Not Assigned",  
+  // dateOfBirth: "Not Assigned",
+  // dateOfJoining: "Not Assigned",
+  // residentialStatus: "Not Assigned",
+  // pfNumber: "Not Assigned",
+  // esiNumber: "Not Assigned",
+  // epsNumber: "Not Assigned",
 
-  phoneNumber: "Not Assigned",
-  permanentAddress: "Not Assigned",
-  currentAddress: "Not Assigned",
-  bankDetails: {
-    accountNumber:"Not Assigned",
-    bankName: "Not Assigned",
-    ifscCode: "Not Assigned",
-    branchName: "Not Assigned",
-    adharNumber: "Not Assigned",
-    panNumber: "Not Assigned",  
+  // phoneNumber: "Not Assigned",
+  // permanentAddress: "Not Assigned",
+  // currentAddress: "Not Assigned",
+  // bankDetails: {
+  //   accountNumber:"Not Assigned",
+  //   bankName: "Not Assigned",
+  //   ifscCode: "Not Assigned",
+  //   branchName: "Not Assigned",
+  //   adharNumber: "Not Assigned",
+  //   panNumber: "Not Assigned",  
 
-  },
-  bloodGroup: "Not Assigned",
-  nationality: "Not Assigned",
-  secondaryeducation: {
-    tenth: {
-      schoolName: "Not Assigned",
-      yearOfPassing: "Not Assigned",
-      percentage: "Not Assigned", 
-      board: "Not Assigned",
-  },
-  twelfth: {
-      schoolName: "Not Assigned", 
-      yearOfPassing: "Not Assigned",
-      percentage: "Not Assigned",
-      board: "Not Assigned",
-  },
-},
-graduation: {
-    collegeName: "Not Assigned",  
-    graduationYear: "Not Assigned",
-    percentage: "Not Assigned",
-  CGPA: "Not Assigned",
-  Backlogs: "Not Assigned",
-},
-  maritalStatus: "Not Assigned",      
-  dateOfMarriage: "Not Assigned",
-  documents: {
-    resume: "Not Assigned",
-    signature: "Not Assigned",
-  },
+  // },
+//   bloodGroup: "Not Assigned",
+//   nationality: "Not Assigned",
+//   secondaryeducation: {
+//     tenth: {
+//       schoolName: "Not Assigned",
+//       yearOfPassing: "Not Assigned",
+//       percentage: "Not Assigned", 
+//       board: "Not Assigned",
+//   },
+//   twelfth: {
+//       schoolName: "Not Assigned", 
+//       yearOfPassing: "Not Assigned",
+//       percentage: "Not Assigned",
+//       board: "Not Assigned",
+//   },
+// },
+// graduation: {
+//     collegeName: "Not Assigned",  
+//     graduationYear: "Not Assigned",
+//     percentage: "Not Assigned",
+//   CGPA: "Not Assigned",
+//   Backlogs: "Not Assigned",
+// },
+//   maritalStatus: "Not Assigned",      
+//   dateOfMarriage: "Not Assigned",
+//   documents: {
+//     resume: "Not Assigned",
+//     signature: "Not Assigned",
+//   },
   
 })
-
+console.log("hello22222")
+  // Create leave data for the user
 const leaveData=await LeaveInfo.create({
   availableLeave: 2,
   creditLeave: 0,
@@ -141,7 +144,6 @@ const leaveData=await LeaveInfo.create({
     }
 }
 
-
 exports.login=async(req,res)=>{
     try {
         const {email,password}=req.body
@@ -151,7 +153,7 @@ exports.login=async(req,res)=>{
         message: `Please Fill up All the Required Fields`,
       })
     }
-    const user = await User.findOne({ email }).populate("takenLeave")
+    const user = await User.findOne({ email })
 
     // If user not found with provided email
     if (!user) {
@@ -200,7 +202,6 @@ exports.login=async(req,res)=>{
     })
     }
 }
-
 
 exports.sendotp=async(req,res)=>{
     try {
@@ -275,3 +276,155 @@ exports.varifyemail=async(req,res)=>{
     })
   }
 }
+
+exports.changePassword = async (req, res) => {
+  try {
+    // Get user data from req.user
+    const userDetails = await User.findById(req.user.id)
+
+    // Get old password, new password, and confirm new password from req.body
+    const { oldPassword, newPassword } = req.body
+
+    // Validate old password
+    const isPasswordMatch = await bcrypt.compare(
+      oldPassword,
+      userDetails.password
+    )
+    if (!isPasswordMatch) {
+      // If old password does not match, return a 401 (Unauthorized) error
+      return res
+        .status(401)
+        .json({ success: false, message: "The password is incorrect" })
+    }
+
+    // Update password
+    const encryptedPassword = await bcrypt.hash(newPassword, 10)
+    const updatedUserDetails = await User.findByIdAndUpdate(
+      req.user.id,
+      { password: encryptedPassword },
+      { new: true }
+    )
+
+    // Send notification email
+    try {
+      const emailResponse = await mailSender(
+        updatedUserDetails.email,
+        "Password for your account has been updated",
+        passwordUpdated(
+          updatedUserDetails.email,
+          `Password updated successfully for ${updatedUserDetails.firstName} ${updatedUserDetails.lastName}`
+        )
+      )
+      console.log("Email sent successfully:", emailResponse.response)
+    } catch (error) {
+      // If there's an error sending the email, log the error and return a 500 (Internal Server Error) error
+      console.error("Error occurred while sending email:", error)
+      return res.status(500).json({
+        success: false,
+        message: "Error occurred while sending email",
+        error: error.message,
+      })
+    }
+
+    // Return success response
+    return res
+      .status(200)
+      .json({ success: true, message: "Password updated successfully" })
+  } catch (error) {
+    // If there's an error updating the password, log the error and return a 500 (Internal Server Error) error
+    console.error("Error occurred while updating password:", error)
+    return res.status(500).json({
+      success: false,
+      message: "Error occurred while updating password",
+      error: error.message,
+    })
+  }
+}
+
+exports.logout = async (req, res) => {
+  try {
+    // Clear the token cookie
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: true,         // use true if using HTTPS
+      sameSite: "None",     // or 'Lax' depending on frontend setup
+    });
+
+    // Return success response
+    return res.status(200).json({
+      success: true,
+      message: "User logged out successfully",
+    })
+  } catch (error) {
+    // If there's an error during logout, log the error and return a 500 (Internal Server Error) error
+    console.error("Error occurred during logout:", error)
+    return res.status(500).json({
+      success: false,
+      message: "Error occurred during logout",
+      error: error.message,
+    })
+  }
+}
+
+exports.resetPassword = async (req, res) => {
+  try {
+    const { email, newPassword } = req.body
+
+    // Validate input
+    if (!email || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and new password are required",
+      })
+    }
+
+    // Find user by email
+    const user = await User.findOne({ email })
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      })
+    }
+
+    // Hash the new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10)
+
+    // Update user's password
+    user.password = hashedPassword
+    await user.save()
+
+    // Send notification email
+    try {
+      const emailResponse = await mailSender(
+        user.email,
+        "Your password has been reset",
+        passwordUpdated(
+          user.email,
+          `Your password has been successfully reset.`
+        )
+      )
+      console.log("Email sent successfully:", emailResponse.response)
+    } catch (error) {
+      console.error("Error occurred while sending email:", error)
+      return res.status(500).json({
+        success: false,
+        message: "Error occurred while sending email",
+        error: error.message,
+      })
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Password reset successfully",
+    })
+  } catch (error) {
+    console.error("Error occurred while resetting password:", error)
+    return res.status(500).json({
+      success: false,
+      message: "Error occurred while resetting password",
+      error: error.message,
+    })
+  }
+}
+  

@@ -1,15 +1,19 @@
-const SalarySlip = require('../models/SalarySlip');
-const generatePDF = require('../utils/pdfGenerator');
-const sendSalarySlip = require('../utils/mailSender');
-const User = require('../models/User');
-const SalarySlip = require('../models/SalarySlip');
+const SalarySlip = require('../../models/SalarySlip');
+//const generatePDF = require('../utils/pdfGenerator');
+//const sendSalarySlip = require('../utils/mailSender');
+const User = require('../../models/User');
+//const SalarySlip = require('../../models/SalarySlip');
 
 // Create
 exports.createSalarySlip = async (req, res) => {
   try {
+    //console.log('Request body:', req.body);
+    const { employeeId, payrollMonth, earnings, deductions } = req.body;
+    //console.log('Employee ID:', employeeId);
     const slip = new SalarySlip(req.body);
     await slip.save();
-     const existingSlip = await User.findOne({employeeId: req.body.employeeId},
+    console.log('Salary slip created:');
+     const existingSlip = await User.findOneAndUpdate({employeeId:employeeId},
       {
         $push: {
           SalarySlip: slip._id
@@ -50,7 +54,12 @@ exports.getAllSalarySlips = async (req, res) => {
 // Read One
 exports.getSalarySlipById = async (req, res) => {
   try {
-    const slip = await SalarySlip.findById({employeeId: req.params.id});
+    const { employeeId } = req.body;
+    console.log('Employee ID:', employeeId);
+    if (!employeeId) {
+      return res.status(400).json({ error: 'Employee ID is required' });
+    }
+    const slip = await SalarySlip.findOne({employeeId: employeeId});
     if (!slip) {
       return res.status(404).json({ error: 'Salary slip not found' });
     }
@@ -64,6 +73,39 @@ exports.getSalarySlipById = async (req, res) => {
   }
 };
 
+
+exports.getallSalarySlipById = async (req, res) => {
+  try {
+    const { employeeId } = req.body;
+    console.log('Employee ID:', employeeId);
+    if (!employeeId) {
+      return res.status(400).json({ error: 'Employee ID is required' });
+    }
+    const slip = await SalarySlip.find({employeeId: employeeId});
+    if (!slip) {
+      return res.status(404).json({ error: 'Salary slip not found' });
+    }
+    return res.status(200).json({
+      success: true,
+      message: 'Salary slip retrieved successfully',
+      slip
+    });
+  } catch {
+    res.status(404).json({ error: 'Not found' });
+  }
+};
+
+
+
+
+
+
+
+
+
+
+
+
 // Update
 exports.updateSalarySlip = async (req, res) => {
   try {
@@ -71,46 +113,43 @@ exports.updateSalarySlip = async (req, res) => {
     if (!employeeId || !salaryId) {
       return res.status(400).json({ error: 'Employee ID and Salary ID are required' });
     }
-    const updated = await SalarySlip.findByIdAndUpdate(req.params.id, req.body, {
+    const updated = await SalarySlip.findByIdAndUpdate(salaryId, req.body, {
       new: true,
       runValidators: true
     });
-    res.json(updated);
+    return res.status(200).json({
+      success: true,
+      message: 'Salary slip updated successfully',
+      updated
+    }); 
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    return res.status(400).json({ error: err.message });  
   }
 };
 
 // Delete
 exports.deleteSalarySlip = async (req, res) => {
-  await SalarySlip.findByIdAndDelete(req.params.id);
-  res.json({ message: 'Deleted successfully' });
-};
-
-// Admin-only Update
-exports.adminUpdateEmployeeDetails = async (req, res) => {
-  try {
-    const updated = await SalarySlip.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true
-    });
-    res.json(updated);
-  } catch (err) {
-    res.status(400).json({ error: err.message });
+ try {
+   const { employeeId, salaryId } = req.body;
+  if (!employeeId || !salaryId) {
+    return res.status(400).json({ error: 'Employee ID and Salary ID are required' });
   }
+  await User.findOneAndUpdate({ employeeId: employeeId },
+    {
+      $pull: {
+        SalarySlip: salaryId
+      }
+    },
+    { new: true }
+  );
+  await SalarySlip.findByIdAndDelete(salaryId);
+  return res.status(200).json({
+    success: true,
+    message: 'Salary slip deleted successfully'
+  });
+ } catch (error) {
+  res.status(500).json({ error: 'Internal server error' });
+  console.error('Error deleting salary slip:', error);  
+ }
 };
 
-// Generate PDF + Email
-exports.sendSalarySlipEmail = async (req, res) => {
-  try {
-    const slip = await SalarySlip.findById(req.params.id);
-    if (!slip) return res.status(404).json({ error: 'Not found' });
-
-    const pdfBuffer = await generatePDF(slip);
-    await sendSalarySlip(req.body.email, pdfBuffer);
-
-    res.json({ message: 'Salary slip sent successfully.' });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};

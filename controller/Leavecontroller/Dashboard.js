@@ -1,20 +1,49 @@
 const User = require("../../models/User")
 const LeaveInfo = require("../../models/LeaveInfo")
+const Leave = require("../../models/Leave")
+
+
+exports.userDetails=async(req,res)=>{
+    try {
+        const userId=req.user.id
+        const userData=await User.findById(userId).populate("additionalDetails").populate("leaveDetails").populate("SalarySlip").exec()
+        const leaveInfo=await LeaveInfo.findOne({_id:userData.leaveDetails}).populate("takenLeave").exec()
+        if(!userData){
+            return res.status(404).json({
+                success:false,
+                message:"User not found"
+            })
+        }
+        return res.status(200).json({   
+            success:true,
+            message:"User data fetched successfully",
+            data:userData,
+            leaveData:leaveInfo
+        })
+    } catch (error) {
+        return res.status(500).json({   
+            success:false,
+            message:"Internal server error"
+        })
+    }
+}
 
 exports.leaveDetails=async(req,res)=>{
     try {
         console.log("hello 3")
-
-        const {userId}=req.body
-        console.log("hello 1",userId)
-
-        const userDetails=await User.findById(userId).populate('leaveDetails').exec()
-        //const userDetails=await User.find({})
+        const {leaveId}=req.body
+        if(!leaveId){
+            return res.status(400).json({
+                success:false,
+                message:"leaveId is required"
+            })
+        }
+        const leaveDetails=await Leave.findById(leaveId)
         console.log("hello 1")
         res.status(200).json({
             success:true,
             message:"get successfully",
-            data:userDetails
+            data:leaveDetails
         })
     
     } catch (error) {
@@ -30,83 +59,47 @@ exports.leaveDetails=async(req,res)=>{
 
 
 
-
-exports.getAllleave=async(req,res)=>{
-    try {
-        const Alldata=await User.find({}).populate('leaveDetails').exec()
-        if(!Alldata){
-            return res.status(200).json({
-                success:false,
-                meassage:"No data exist..."
-            })
-        }
-        res.status(200).json({
-            success:true,
-            message:"Data fetch successfully ...",
-            data:Alldata
-        })
-    } catch (error) {
-        console.log(error)
-        return res.status(400).json({
-            success:false,
-            message:"Error during fetch.."
-        })
-    }
-}
-
-exports.addyearLeave=async(req,res)=>{
-  try {
-    const userId=req.user.id
-    /* this code change the data value after one year*/
-    const userdata=await User.findById(userId)
-    if(!userdata){
-        return res.status(404).json({
-            success:false,
-            message:"User not found"
-        })
-    }
-    const userDetails=await LeaveInfo.findById({_id:userdata.leaveDetails})
-    let leaveTotal=userDetails.creditleave+userDetails.Totalleave
-    await LeaveInfo.findByIdAndUpdate({_id:userdata.leaveDetails},
-    { $set: { totalLeave: leaveTotal } }
-    );
-    await LeaveInfo.findByIdAndUpdate({_id:userdata.leaveDetails},
-        {$set:{creditleave:0}},
-        {new:true}
-    )
-
-  } catch (error) {
-    console.error('Error adding leave:', err);
-  }
-}
 exports.creditleave=async(req,res)=>{
     try {
         const {userId}=req.body
-        const userData=await User.findById(userId)
+        const userData=await User.findById(userId).populate("leaveDetails").exec()
         if(!userData){
             return res.status(404).json({
                 success:false,
                 message:"User not found"
             })
         }
-        const userLeaveInfo=await LeaveInfo.findById({_id:userData.leaveDetails})
+        const userLeaveInfo=await LeaveInfo.findById(userData.leaveDetails)
         userLeaveInfo.creditleave=userLeaveInfo.creditleave+userLeaveInfo.awailbleLeave
         await userLeaveInfo.save()
+        res.status(200).json({
+            success:true,
+            message:"Leave credited successfully",
+            data:userLeaveInfo
+        })
     } catch (error) {
         console.log(error)
     }
 }
-exports.everyUser=async(req,res)=>{
+exports.awailbleset=async(req,res)=>{
     try {
-        await LeaveInfo.updateMany({ $inc: { awailbleLeave: 1 } });
+        await LeaveInfo.updateMany({},{ $set: { awailbleLeave: 2 } });
+        //await LeaveInfo.save()
+        res.status(200).json({
+            success:true,
+            message:"Leave set successfully"
+        })  
     } catch (error) {
         console.log(error)
     }
 }
-
-exports.everyUserReset=async(req,res)=>{
+exports.awailbleReset=async(req,res)=>{
     try {
-        await LeaveInfo.updateMany({ $set: { awailbleLeave: 0 } });
+        await LeaveInfo.updateMany({},{ $set: { awailbleLeave: 0 } });
+        res.status(200).json({
+            success:true,
+            message:"Leave reset successfully"
+        })
     } catch (error) {
         console.log(error)
     }

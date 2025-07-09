@@ -1,22 +1,11 @@
-const Employee = require('../models/Employee');
-const mongoose = require('mongoose');
-const User = require('../models/User');
+const Employee = require('../../models/Employee'); // Assuming you have an Employee model
+const User = require('../../models/User'); // Assuming you have a User model
 
-// Create new employee
-// exports.createEmployee = async (req, res) => {
-//   try {
-//     const employee = new Employee(req.body);
-//     await employee.save();
-//     res.status(201).json(employee.getPublicProfile());
-//   } catch (err) {
-//     res.status(400).json({ error: err.message });
-//   }
-// };
 
 // Get all employees
 exports.getAllEmployees = async (req, res) => {
   try {
-    const employees = await User.find({}).populate('additionalDetails').exce();
+    const employees = await User.find().populate('additionalDetails').exec();
     if (!employees || employees.length === 0) {
       return res.status(404).json({ error: 'No employees found' });
     }
@@ -49,19 +38,20 @@ exports.getEmployeeById = async (req, res) => {
 // Update employee
 exports.updateEmployee = async (req, res) => {
   try {
-    const { id } = req.params;
-
-    // Check if ID is valid
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ error: 'Invalid Employee ID' });
+    console.log('Update Employee Request:', req.body);
+    const  userId  = req.user.id;
+    //const userId = req.user.id; // Assuming you have user ID from auth middleware
+    const updates = req.body;
+    if(!updates){
+      return res.status(400).json({ error: 'No updates provided' });
+    }
+    const userdata = await User.findById(userId);
+    if (!userdata || !userdata.additionalDetails) {
+      return res.status(404).json({ error: 'User or employee details not found' });
     }
 
-    // Optional: whitelist fields to avoid unwanted updates
-    // For deep/nested updates, make sure the client sends correctly structured data
-    const updates = req.body;
-
     // Perform update
-    const employee = await Employee.findByIdAndUpdate(id, updates, {
+    const employee = await Employee.findByIdAndUpdate(userdata.additionalDetails, updates, {
       new: true,
       runValidators: true,
     });
@@ -79,13 +69,4 @@ exports.updateEmployee = async (req, res) => {
     res.status(500).json({ error: 'Server error: ' + error.message });
   }
 };
-// Delete employee
-// exports.deleteEmployee = async (req, res) => {
-//   try {
-//     const employee = await Employee.findByIdAndDelete(req.params.id);
-//     if (!employee) return res.status(404).json({ error: 'Employee not found' });
-//     res.json({ message: 'Employee deleted successfully' });
-//   } catch (err) {
-//     res.status(500).json({ error: err.message });
-//   }
-// };
+

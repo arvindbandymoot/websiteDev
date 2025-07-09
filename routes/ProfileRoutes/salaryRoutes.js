@@ -6,21 +6,18 @@ const {
   getSalarySlipById,
   updateSalarySlip,
   deleteSalarySlip,
-  adminUpdateEmployeeDetails,
-  sendSalarySlipEmail
-} = require('../controllers/salaryController');
+  getallSalarySlipById
+} = require('../../controller/EmployeeProfile/salaryController');
 
+const { auth, isAdmin, isEmployees } = require('../../midlewere/Auth');  
 // CRUD
-router.post('/:id', createSalarySlip);
-router.get('/:id', getAllSalarySlips);
-router.get('/:id', getSalarySlipById);
-router.put('/:id', updateSalarySlip);
-router.delete('/:id', deleteSalarySlip);
+router.post('/createsalaryslip',auth,isAdmin, createSalarySlip);
+router.put('/updatesalaryslip',auth,isAdmin, updateSalarySlip);
+router.post('/deletesalaryslipByuser',auth, deleteSalarySlip);
 
-// Admin-only
-router.put('/employee/:id',auth, isAdmin, adminUpdateEmployeeDetails);
 
-// PDF Email
-router.post('/:id/send-slip', sendSalarySlipEmail);
+router.get('/getAllsalaryslip',auth,isAdmin, getAllSalarySlips);
+router.post('/getsalaryslipbyid',auth,isAdmin, getSalarySlipById);
+router.post('/getallsalaryslipbyID',auth,getallSalarySlipById);
 
 module.exports = router;

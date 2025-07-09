@@ -1,14 +1,14 @@
-const mongoose=require('mongoose')
+const mongoose=require('mongoose');
 const leaveSchema=new mongoose.Schema(
     {
-        // name:{
-        //     type:String,
-        //     require:true
-        // },
-        // email:{
-        //     type:String,
-        //     require:true
-        // },
+        name:{
+            type:String,
+            require:true
+        },
+        email:{
+            type:String,
+            require:true
+        },
         userId:{
             type:String,
             require:true
@@ -42,13 +42,20 @@ const leaveSchema=new mongoose.Schema(
             type:Number,
             default:0
         },
+        iscreditleave:{
+            type:Number,    
+            default:0
+        },
+        leavedays:{
+            type:Number,    
+            default:0
+        },
         createdAt: {
 		type: Date,
 		default: Date.now,
 		//expires: 60 * 5, // The document will be automatically deleted after 5 minutes of its creation time
-	},
+	},  
     }
 )
-const Leave = mongoose.model("Leave", leaveSchema);
 
-module.exports = Leave;
+module.exports = mongoose.model("Leave", leaveSchema);;

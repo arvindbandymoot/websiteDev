@@ -24,4 +24,4 @@ const leaveInfoSchema = new mongoose.Schema(
     }
 )
 
-exports = mongoose.model("LeaveInfo", leaveInfoSchema);
+module.exports = mongoose.model("LeaveInfo", leaveInfoSchema);

@@ -1,11 +1,14 @@
 const express=require('express')
 const router=express.Router()
-const {leaveDetails,addyearLeave,creditleave,everyUser,everyUserReset,getAllleave}=require('../../controller/Leavecontroller/Dashboard')
+const {leaveDetails,creditleave,awailbleset,awailbleReset,userDetails}=require('../../controller/Leavecontroller/Dashboard')
+const {auth,isEmployees,isAdmin}=require('../../midlewere/Auth')    
 
-router.post('/leaveDetails',leaveDetails)
-router.post('/addleaveInyear',addyearLeave)
-router.post('/creditleaveInmonth',creditleave)
-router.get('/addleaveInhalfmonth',everyUser)
-router.get('/resetleaveInmonth',everyUserReset)
-router.get('/getAllleaveDetails',getAllleave)
+router.post('/leaveDetails',auth,isEmployees,leaveDetails)
+//router.get('/getAllleave',getAllleave)
+router.get('/userDetails',auth,isEmployees,userDetails)
+
+
+router.put('/creditleaveInmonth',creditleave)
+router.get('/addleaveInmonth',awailbleset)
+router.get('/resetleaveInmonth',awailbleReset)
 module.exports = router
